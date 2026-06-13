@@ -7,20 +7,21 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 
 def download_youtube_audio(url: str) -> str:
-    print(f"URL RECEIVED: {url}")
 
     output_path = os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s")
 
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": output_path,
+        "quiet": True,
         "noplaylist": True,
-        "quiet": False,
+
         "extractor_args": {
             "youtube": {
                 "player_client": ["android"]
             }
         },
+
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",
@@ -30,32 +31,26 @@ def download_youtube_audio(url: str) -> str:
         ],
     }
 
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download=True)
 
-            filename = ydl.prepare_filename(info)
-
-            filename = (
-                filename.replace(".webm", ".wav")
-                .replace(".m4a", ".wav")
-                .replace(".mp4", ".wav")
-            )
-
-            return filename
-
-    except Exception as e:
-        raise Exception(
-            f"YouTube download failed: {str(e)}\n"
-            "Try uploading the audio/video file directly."
+        filename = (
+            ydl.prepare_filename(info)
+            .replace(".webm", ".wav")
+            .replace(".m4a", ".wav")
         )
+
+    return filename
 
 
 def convert_to_wav(input_path: str) -> str:
+
     output_path = os.path.splitext(input_path)[0] + "_converted.wav"
 
     audio = AudioSegment.from_file(input_path)
-    audio = audio.set_channels(1).set_frame_rate(16000)
+
+    audio = audio.set_channels(1)
+    audio = audio.set_frame_rate(16000)
 
     audio.export(output_path, format="wav")
 
@@ -63,6 +58,7 @@ def convert_to_wav(input_path: str) -> str:
 
 
 def chunk_audio(wav_path: str, chunk_minutes: int = 10) -> list:
+
     audio = AudioSegment.from_wav(wav_path)
 
     chunk_ms = chunk_minutes * 60 * 1000
@@ -70,6 +66,7 @@ def chunk_audio(wav_path: str, chunk_minutes: int = 10) -> list:
     chunks = []
 
     for i, start in enumerate(range(0, len(audio), chunk_ms)):
+
         chunk = audio[start:start + chunk_ms]
 
         chunk_path = f"{wav_path}_chunk_{i}.wav"
@@ -83,21 +80,11 @@ def chunk_audio(wav_path: str, chunk_minutes: int = 10) -> list:
 
 def process_input(source: str) -> list:
 
-    print(f"SOURCE RECEIVED: {source}")
-
     if source.startswith("http://") or source.startswith("https://"):
 
         print("Detected YouTube URL. Downloading audio...")
 
-        try:
-            wav_path = download_youtube_audio(source)
-
-        except Exception as e:
-            raise Exception(
-                f"{e}\n\n"
-                "YouTube may block downloads on Streamlit Cloud.\n"
-                "Please upload an audio/video file instead."
-            )
+        wav_path = download_youtube_audio(source)
 
     else:
 
