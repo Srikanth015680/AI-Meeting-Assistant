@@ -13,7 +13,7 @@ torchaudio>=2.2.0                 # Audio utilities for PyTorch
 
 # ── Translation (Hindi → English) ─────────────────────────────────────────────
 deep-translator>=1.11.4           # Lightweight translation wrapper (Google backend)
-
+torchvision>=0.17.0
 # ── LLM Orchestration — LangChain LCEL + Mistral ──────────────────────────────
 langchain-chroma>=0.2.0
 langchain>=0.2.0
