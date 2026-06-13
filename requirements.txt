@@ -15,6 +15,7 @@ torchaudio>=2.2.0                 # Audio utilities for PyTorch
 deep-translator>=1.11.4           # Lightweight translation wrapper (Google backend)
 
 # ── LLM Orchestration — LangChain LCEL + Mistral ──────────────────────────────
+langchain-chroma>=0.2.0
 langchain>=0.2.0
 langchain-core>=0.2.0
 langchain-community>=0.2.0
